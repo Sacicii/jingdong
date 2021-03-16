@@ -9,7 +9,7 @@
             总计:&nbsp;
             <span class="check__info__price">&yen;128</span>
             </div>
-          <div class="check__btn">去结算</div>
+          <div class="check__btn">结算</div>
         </div>
     </div>
 </template>
