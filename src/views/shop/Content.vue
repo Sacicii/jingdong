@@ -21,9 +21,9 @@
             </p>
           </div>
           <div class="product__number">
-            <span class="product__number__minus">-</span>
-            0
-            <span class="product__number__plus">+</span>
+            <span class="product__number__minus" @click="() => handleCountChange(shopId, item._id, item, false)">-</span>
+            {{cartList?.[shopId]?.[item._id]?.count || 0}}
+            <span class="product__number__plus" @click="() => handleCountChange(shopId, item._id, item, true)">+</span>
           </div>
         </div>
       </div>
@@ -32,8 +32,9 @@
 
 <script>
 import { reactive, ref, toRefs, watchEffect } from 'vue'
-import { get } from '../../utils/request'
+import { useStore } from 'vuex'
 import { useRoute } from 'vue-router'
+import { get } from '../../utils/request'
 
 const categoryList = [{
   name: '全部商品', tab: 'all'
@@ -44,9 +45,7 @@ const categoryList = [{
 }]
 
 // 商品内容
-const useContentEffect = (currentTab) => {
-  const route = useRoute()
-  const shopId = route.params.id
+const useContentEffect = (currentTab, shopId) => {
   const contentData = reactive({
     contentList: []
   })
@@ -79,14 +78,27 @@ const useCategoryEffect = () => {
   return { currentTab, handleCategaryClick }
 }
 
+// 添加商品
+const useCartEffect = () => {
+  const store = useStore()
+  const { cartList } = toRefs(store.state)
+  const handleCountChange = (shopId, productId, productInfo, isAdd) => {
+    store.commit('addCartCount', { shopId, productId, productInfo, isAdd })
+    // console.log(shopId, productId, productInfo)
+  }
+  return { cartList, handleCountChange }
+}
+
 export default {
   name: 'Content',
   setup (props) {
+    const route = useRoute()
+    const shopId = route.params.id
     const { currentTab, handleCategaryClick } = useCategoryEffect()
-    const { contentList } = useContentEffect(currentTab)
-
+    const { contentList } = useContentEffect(currentTab, shopId)
+    const { cartList, handleCountChange } = useCartEffect()
     // getContentData(currentTab)
-    return { currentTab, contentList, categoryList, handleCategaryClick }
+    return { currentTab, contentList, categoryList, handleCategaryClick, cartList, shopId, handleCountChange }
   }
 }
 </script>
