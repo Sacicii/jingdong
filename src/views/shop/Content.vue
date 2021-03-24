@@ -1,20 +1,21 @@
 <template>
     <div class="content">
       <div class="category">
-        <!-- <div class="category__item category__item--active">全部商品</div> -->
-        <div
+      <!-- 左侧目录 -->
+      <div
         v-for="item in categoryList"
         :key="item.tab"
         :class="{'category__item': true, 'category__item--active': currentTab === item.tab}"
         @click="() => handleCategaryClick(item.tab)"
         >{{item.name}}</div>
       </div>
+      <!-- 右侧商品 -->
       <div class="product">
         <div class="product__item" v-for="(item, index) in contentList" :key="index">
           <img :src="item.imgUrl" alt="" class="product__item__img">
           <div class="product__item__detail">
             <h4 class="product__item__title">{{item.name}}</h4>
-            <p class="product__item__sales">{{item.sales}}</p>
+            <p class="product__item__sales">月售 {{item.sales}} 件</p>
             <p class="product__item__price">
               <span class="product__item__yen">&yen;</span>{{item.price}}
               <span class="product__item__origin">&yen;{{item.oldPrice}}</span>
@@ -22,7 +23,8 @@
           </div>
           <div class="product__number">
             <span class="product__number__minus" @click="() => handleCountChange(shopId, item._id, item, false)">-</span>
-            {{cartList?.[shopId]?.[item._id]?.count || 0}}
+            <!-- {{cartList?.[shopId]?.[item._id]?.count || 0}} -->
+            {{item.count || 0}}
             <span class="product__number__plus" @click="() => handleCountChange(shopId, item._id, item, true)">+</span>
           </div>
         </div>
@@ -32,9 +34,9 @@
 
 <script>
 import { reactive, ref, toRefs, watchEffect } from 'vue'
-import { useStore } from 'vuex'
 import { useRoute } from 'vue-router'
 import { get } from '../../utils/request'
+import { useCommonCartEffect } from './commonCartEffect'
 
 const categoryList = [{
   name: '全部商品', tab: 'all'
@@ -78,17 +80,6 @@ const useCategoryEffect = () => {
   return { currentTab, handleCategaryClick }
 }
 
-// 添加商品
-const useCartEffect = () => {
-  const store = useStore()
-  const { cartList } = toRefs(store.state)
-  const handleCountChange = (shopId, productId, productInfo, isAdd) => {
-    store.commit('addCartCount', { shopId, productId, productInfo, isAdd })
-    // console.log(shopId, productId, productInfo)
-  }
-  return { cartList, handleCountChange }
-}
-
 export default {
   name: 'Content',
   setup (props) {
@@ -96,7 +87,7 @@ export default {
     const shopId = route.params.id
     const { currentTab, handleCategaryClick } = useCategoryEffect()
     const { contentList } = useContentEffect(currentTab, shopId)
-    const { cartList, handleCountChange } = useCartEffect()
+    const { cartList, handleCountChange } = useCommonCartEffect()
     // getContentData(currentTab)
     return { currentTab, contentList, categoryList, handleCategaryClick, cartList, shopId, handleCountChange }
   }

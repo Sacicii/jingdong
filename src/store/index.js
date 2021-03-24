@@ -6,6 +6,7 @@ export default createStore({
     }
   },
   mutations: {
+    //  更改商品数量
     addCartCount (state, payload) {
       const { shopId, productId, productInfo, isAdd } = payload
       // console.log(shopId, productId, productInfo, isAdd)
@@ -19,8 +20,16 @@ export default createStore({
         product.count = 0
       }
       isAdd ? product.count += 1 : product.count > 0 ? product.count -= 1 : product.count = 0
+      product.count > 0 ? product.check = true : product.check = false // 确认是否勾中
       shopInfo[productId] = product
       state.cartList[shopId] = shopInfo
+    },
+
+    // 更改商品选中状态
+    checkChange (state, payload) {
+      const { shopId, productId } = payload
+      const product = state.cartList[shopId][productId]
+      product.check = !product.check
     }
   },
   actions: {
